@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi.security import OAuth2PasswordBearer
 from schemas.schemas import UserRequest
 from db.models import User
 from db.base import get_db
@@ -6,16 +7,10 @@ from sqlalchemy.orm import Session
 
 
 user_router = APIRouter()
+oauth2_schema = OAuth2PasswordBearer(tokenUrl='login')
 
-@user_router.post('/create')
-def create_user(
-    request: Request,
+@user_router.post('/login')
+def login_user(
     user: UserRequest,
     db: Session = Depends(get_db)
 ):
-
-    new_user = User(name=user.name, ip=request.client.host)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user

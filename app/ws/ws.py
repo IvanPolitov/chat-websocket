@@ -1,30 +1,46 @@
-from fastapi import APIRouter, WebSocket
-from typing import Dict
-import logging
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
+from typing import Dict, Tuple
 
-logger = logging.Logger(__name__)
-
-ws_router = APIRouter()
-
-USERS: Dict[str, WebSocket] = {}
+from fastapi.responses import HTMLResponse
 
 
-@ws_router.get("/qwe")
-def index() -> Dict[str, str]:
-    logger.error(USERS)
-    return {"message": "Hello, world!"}
+ws_router = APIRouter(prefix='/ws')
 
 
-# пример чата на вебсокете между двумя пользователями
+class ConnectionManager():
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+
+    async def connect(self, ip: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[ip] = websocket
+        print(self.active_connections)
+
+    def disconnect(self, ip: str):
+        self.active_connections.pop(ip)
+
+    async def broadcast(self, message: str):
+        for ip, connection in self.active_connections.items():
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+
+@ws_router.get('/')
+async def index():
+    with open('app/ws/template/index.html', 'r') as file:
+        content = file.read()
+    return HTMLResponse(content=content)
+
+
 @ws_router.websocket('/ws')
-async def ws(websocket: WebSocket):
-    await websocket.accept()
-    name = await websocket.receive_text()
-    USERS[name] = websocket
-    while True:
-        data = await websocket.receive_text()
-        logger.error(data)
-        if USERS['111'] == websocket:
-            await USERS['222'].send_text(data)
-        else:
-            await USERS['111'].send_text(data)
+async def ws_endpoint(websocket: WebSocket):
+    ip = ':'.join((websocket.client.host, str(websocket.client.port)))
+    await manager.connect(ip, websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.broadcast(f'{ip}: {data}')
+    except WebSocketDisconnect:
+        manager.disconnect(ip)
+        await manager.broadcast(f"A client has left the chat")

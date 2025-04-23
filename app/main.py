@@ -12,7 +12,7 @@ if proj_dir not in sys.path:
 
 
 from db.base import Base, engine
-from api.user import user_router
+from app.api.users import user_router
 from ws.ws import ws_router
 
 app = FastAPI()
