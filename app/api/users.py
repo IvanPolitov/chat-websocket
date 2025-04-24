@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 user_router = APIRouter()
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='login')
 
+
 @user_router.post('/login')
 def login_user(
     user: UserRequest,
