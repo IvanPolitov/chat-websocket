@@ -2,12 +2,15 @@ from datetime import datetime, timedelta
 import os
 from typing import Dict
 from base64 import urlsafe_b64encode, urlsafe_b64decode
+from fastapi import Depends, HTTPException
 import jwt
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidKey
 
+from app.api.users import oauth2_schema
+from app.db.models import User
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 SECRET_KEY = 'SECRET_KEY'
@@ -122,12 +125,7 @@ def create_jwt(data: Dict) -> str:
     return token
 
 
-if __name__ == '__main__':
-    q = 'aaa'
-    # print(hash_password(q))
-    c = hash_password(q)
-    print(c)
-    print(verify_password(c, q))
-    print(verify_password(c, 'qwe'))
 
-    print(create_jwt({'qq': 1}))
+
+if __name__ == '__main__':
+    pass

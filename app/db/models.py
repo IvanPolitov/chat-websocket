@@ -7,7 +7,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False)
     password_hashed: Mapped[str] = mapped_column(String, nullable=False)
 
 
@@ -16,7 +16,6 @@ class Message(Base):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     sender_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    recipient_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', nullable=False))
     room_id: Mapped[int] = mapped_column(Integer, ForeignKey('rooms.id', nullable=False))
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
