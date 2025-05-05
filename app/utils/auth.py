@@ -1,16 +1,16 @@
+from fastapi import status
 from datetime import datetime, timedelta
 import os
 from typing import Dict
 from base64 import urlsafe_b64encode, urlsafe_b64decode
-from fastapi import Depends, HTTPException
+
+from fastapi import HTTPException
 import jwt
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidKey
 
-from app.api.users import oauth2_schema
-from app.db.models import User
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 SECRET_KEY = 'SECRET_KEY'
@@ -125,6 +125,13 @@ def create_jwt(data: Dict) -> str:
     return token
 
 
+def decode_jwt(token: str) -> Dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.PyJWTError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail='Unauthorized. JWTerror') from e
+    return payload
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from fastapi import FastAPI, WebSocket
@@ -11,14 +12,13 @@ if proj_dir not in sys.path:
     sys.path.append(proj_dir)
 
 
-from db.base import Base, engine  # noqa
-from app.api.users import user_router  # noqa
+from db.base import create_db  # noqa
+from api.users import user_router  # noqa
 from ws.ws import ws_router  # noqa
 
 app = FastAPI()
 app.include_router(user_router)
 app.include_router(ws_router)
-Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
@@ -27,6 +27,7 @@ def welcome():
 
 
 if __name__ == '__main__':
+    asyncio.run(create_db())
     uvicorn.run(
         app='main:app',
         host='127.0.0.1',

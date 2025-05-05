@@ -7,8 +7,9 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    username: Mapped[str] = mapped_column(String, nullable=False)
-    password_hashed: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, unique=True,  nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)
 
 
 class Message(Base):
@@ -16,7 +17,7 @@ class Message(Base):
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     sender_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
-    room_id: Mapped[int] = mapped_column(Integer, ForeignKey('rooms.id', nullable=False))
+    room_id: Mapped[int] = mapped_column(Integer, ForeignKey('rooms.id'), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     room = relationship("Room", back_populates="messages")

@@ -51,6 +51,7 @@ async def create_db():
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    await engine.dispose()
 
 
 async def drop_db():
@@ -62,3 +63,4 @@ async def drop_db():
     """
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()

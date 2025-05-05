@@ -1,7 +1,7 @@
-from app.db.repos import UserRepository
-from app.schemas.schemas import UserCreate
-from app.utils.auth import hash_password, verify_password
-from app.schemas.schemas import User
+from db.repos import UserRepository
+from schemas.user import UserCreate
+from utils.auth import decode_jwt, hash_password, verify_password
+from schemas.user import User
 
 
 class UserServices:
@@ -14,23 +14,19 @@ class UserServices:
 
     async def authenticate_user(self, username: str, password: str) -> User:
         user = await self.user_repo.get_by_username(username)
-        if not user or not verify_password(password, user.password_hashed):
+
+        if not user or not verify_password(user.password, password):
             return None
         return user
 
+    async def unique_user(self, username: str) -> bool:
+        user = await self.user_repo.get_by_username(username)
+        if user:
+            return False
+        return True
 
-async def get_current_user(token: str = Depends(oauth2_schema)) -> User:
-    try:
-        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if not username:
-            raise HTTPException(status_code=401, detail="Не авторизован. В токене нет username")
-    except jwt.PyJWTError as e:
-        raise HTTPException(status_code=401, detail="Не авторизован.") from e
+    async def get_user_from_token(self, token: str) -> User:
+        payload = decode_jwt(token)
+        user = await self.user_repo.get_by_username(payload.get('sub'))
 
-    user = get_user_from_db(username)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="Не авторизован. Пользователь не найден в базе данных.")
-
-    return user
+        return user

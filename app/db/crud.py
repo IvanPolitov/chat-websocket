@@ -1,10 +1,8 @@
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.db.models import User
-from app.db.base import get_db
-from app.schemas.schemas import UserCreate
+from db.models import User
+from schemas.user import UserCreate
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> User | None:
