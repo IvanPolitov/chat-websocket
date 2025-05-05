@@ -6,7 +6,7 @@ proj_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..\\..'))
 if proj_dir not in sys.path:
     sys.path.append(proj_dir)
 
-from app.utils.auth import verify_password, hash_password  # noqa
+from app.utils.utils import verify_password, hash_password  # noqa
 
 
 class TestHashPassword:

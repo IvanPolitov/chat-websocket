@@ -1,6 +1,9 @@
+from fastapi import Depends
+from db.base import get_db
 from db.repos import UserRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.user import UserCreate
-from utils.auth import decode_jwt, hash_password, verify_password
+from utils.utils import decode_jwt, hash_password, verify_password
 from schemas.user import User
 
 
@@ -30,3 +33,7 @@ class UserServices:
         user = await self.user_repo.get_by_username(payload.get('sub'))
 
         return user
+
+
+def get_user_services(db: AsyncSession = Depends(get_db)):
+    return UserServices(UserRepository(db))
