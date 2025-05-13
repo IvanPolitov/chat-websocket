@@ -1,10 +1,11 @@
 from fastapi import Depends
 from db.base import get_db
-from db.repos import UserRepository
+from db.repos import UserRepository, RoomRepository
 from sqlalchemy.ext.asyncio import AsyncSession
-from schemas.user import UserCreate
+from schemas.user import UserCreate, User
+from schemas.room import RoomCreate, Room
 from utils.utils import decode_jwt, hash_password, verify_password
-from schemas.user import User
+from typing import List
 
 
 class UserServices:
@@ -35,5 +36,29 @@ class UserServices:
         return user
 
 
+class RoomServices:
+    def __init__(self, room_repo: RoomRepository):
+        self.room_repo = room_repo
+
+    async def create_room(self, room_data: RoomCreate, creator_id: int) -> Room:
+        new_room = await self.room_repo.create(room_data)
+        new_room = await self.room_repo.add_user(new_room.id, creator_id)
+        return new_room
+
+    async def get_all_current_user_rooms(self, user_id: int) -> List[Room]:
+        rooms = await self.room_repo.get_by_current_user_id(user_id)
+        return rooms
+
+    async def unique_room(self, name: str) -> bool:
+        room = await self.room_repo.get_by_name(name)
+        if room:
+            return False
+        return True
+
+
 def get_user_services(db: AsyncSession = Depends(get_db)):
     return UserServices(UserRepository(db))
+
+
+def get_room_services(db: AsyncSession = Depends(get_db)):
+    return RoomServices(RoomRepository(db))

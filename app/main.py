@@ -14,10 +14,12 @@ if proj_dir not in sys.path:
 
 from db.base import create_db  # noqa
 from api.users import user_router  # noqa
+from api.rooms import rooms_router # noqa
 from ws.ws import ws_router  # noqa
 
 app = FastAPI()
 app.include_router(user_router)
+app.include_router(rooms_router)
 app.include_router(ws_router)
 
 
